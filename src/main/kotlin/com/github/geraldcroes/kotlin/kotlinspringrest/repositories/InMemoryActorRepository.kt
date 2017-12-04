@@ -6,5 +6,9 @@ import org.springframework.stereotype.Repository
 class InMemoryActorRepository : ActorRepository {
     override fun find() = Datas.actors()
 
-    override fun get(uid: String) = Datas.actors().first { it.uid == uid }
+    override fun get(uid: String) = try {
+        Datas.actors().first { it.uid == uid }
+    } catch (exception: NoSuchElementException) {
+        throw ActorNotFoundException(uid)
+    }
 }

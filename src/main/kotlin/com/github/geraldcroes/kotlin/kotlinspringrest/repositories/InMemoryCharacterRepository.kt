@@ -4,7 +4,11 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class InMemoryCharacterRepository : CharacterRepository {
-    override fun get(uid: String) = Datas.characters().first { it.uid == uid }
-
     override fun find() = Datas.characters()
+
+    override fun get(uid: String) = try {
+        Datas.characters().first { it.uid == uid }
+    } catch (exception: NoSuchElementException) {
+        throw CharacterNotFoundException(uid)
+    }
 }

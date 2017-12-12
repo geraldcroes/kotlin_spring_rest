@@ -45,7 +45,7 @@ class ActorTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", `is`("Keanu Reeves")))
                 .andExpect(jsonPath("$.uid", `is`("KR")))
-                .andExpect(jsonPath("$.actings[0].movie_uid", `is`("TM1")))
-                .andExpect(jsonPath("$.actings[0].character_uid", `is`("TA")))
+                .andExpect(jsonPath("$.actings[0].movieUid", `is`("TM1")))
+                .andExpect(jsonPath("$.actings[0].characterUid", `is`("TA")))
     }
 }

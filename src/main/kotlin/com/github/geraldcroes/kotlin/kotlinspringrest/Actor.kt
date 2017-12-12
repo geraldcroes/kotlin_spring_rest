@@ -5,14 +5,14 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.stereotype.Repository
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.sql.ResultSet
 
 data class Actor(
         val uid: String,
         val name: String,
-        val actingHistory: List<Acting>
+        val actings: List<Acting>
 )
 
 data class Acting(
@@ -27,29 +27,29 @@ class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
                         where a.uid=act.actor_uid"""
 
     fun find() : List<Actor> {
-        return jdbcTemplate.queryForList(BASE_QUERY, MapSqlParameterSource()).groupBy {
-            it.get("UID")
-        }.map {
-            Actor ("Toto", "Titi",
-                    it.value.map {
-                        Acting(it.get("MOVIE_UID") as String, it.get("CHARACTER_UID") as String)
-                    }
-            )
-        }
+        return map(jdbcTemplate.queryForList(BASE_QUERY, MapSqlParameterSource()))
     }
 
-    fun get(uid: String) =
-            jdbcTemplate.queryForObject(
-                    "$BASE_QUERY where uid = :uid",
-                    MapSqlParameterSource("uid", uid),
-                    this::mapRow
-            )
+    fun get(uid: String) =  map(
+        jdbcTemplate.queryForList(
+        "$BASE_QUERY AND a.uid = :uid",
+        MapSqlParameterSource("uid", uid))
+    ).first()
 
-    fun mapRow(resultSet: ResultSet, rowNum: Int) =
-            Character(
-                    resultSet.getString("uid"),
-                    resultSet.getString("name")
-            )
+    fun map(results: List<Map<String, Any>>) = results.groupBy {
+        it.get("UID")
+    }.map {
+        Actor (
+                it.value.first().get("UID") as String,
+                it.value.first().get("NAME") as String,
+                it.value.map {
+                    Acting(
+                            it.get("MOVIE_UID") as String,
+                            it.get("CHARACTER_UID") as String
+                    )
+                }
+        )
+    }
 }
 
 @RestController
@@ -57,4 +57,7 @@ class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
 class ActorController(@Autowired val actorRepository: ActorRepository) {
     @GetMapping("")
     fun find() = actorRepository.find()
+
+    @GetMapping("/{uid}")
+    fun get(@PathVariable("uid") uid: String) = actorRepository.get(uid)
 }

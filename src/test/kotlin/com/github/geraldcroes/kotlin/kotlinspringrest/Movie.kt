@@ -48,4 +48,10 @@ class MovieTest {
                 .andExpect(jsonPath("$.uid", `is`("TM1")))
                 .andExpect(jsonPath("$.year", `is`(1999)))
     }
+
+    @Test
+    fun `should send a 404 when requesting for an unknown movie` () {
+        mvc.perform(get("/movies/FOO"))
+                .andExpect(status().isNotFound())
+    }
 }

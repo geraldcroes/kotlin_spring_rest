@@ -1,6 +1,7 @@
 package com.github.geraldcroes.kotlin.kotlinspringrest
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.stereotype.Repository
@@ -21,12 +22,15 @@ class CharacterRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperati
 
     fun find() = jdbcTemplate.query(BASE_QUERY, this::mapRow)
 
-    fun get(uid: String) =
-            jdbcTemplate.queryForObject(
-                    "$BASE_QUERY where uid = :uid",
-                    MapSqlParameterSource("uid", uid),
-                    this::mapRow
-            )
+    fun get(uid: String) = try {
+        jdbcTemplate.queryForObject(
+                "$BASE_QUERY where uid = :uid",
+                MapSqlParameterSource("uid", uid),
+                this::mapRow
+        )
+    } catch (exception: EmptyResultDataAccessException) {
+        throw CharacterNotFoundException(uid)
+    }
 
     fun mapRow(resultSet: ResultSet, rowNum: Int) =
             Character(
@@ -34,6 +38,8 @@ class CharacterRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperati
                     resultSet.getString("name")
             )
 }
+
+class CharacterNotFoundException(val uid: String) : Exception()
 
 @RestController
 @RequestMapping("/characters/")

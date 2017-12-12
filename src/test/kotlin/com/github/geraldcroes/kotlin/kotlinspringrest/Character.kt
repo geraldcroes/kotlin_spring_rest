@@ -47,4 +47,10 @@ class CharacterTest {
                 .andExpect(jsonPath("$.name", `is`("Persephone")))
                 .andExpect(jsonPath("$.uid", `is`("P")))
     }
+
+    @Test
+    fun `should send a 404 when requesting for an unknown character` () {
+        mvc.perform(get("/characters/FOO"))
+                .andExpect(status().isNotFound())
+    }
 }

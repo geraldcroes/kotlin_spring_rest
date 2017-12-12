@@ -31,11 +31,16 @@ class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
         return map(jdbcTemplate.queryForList(BASE_QUERY, MapSqlParameterSource()))
     }
 
-    fun get(uid: String) = map(
-            jdbcTemplate.queryForList(
-                    "$BASE_QUERY where a.uid = :uid",
-                    MapSqlParameterSource("uid", uid))
-    ).first()
+    fun get(uid: String) = try {
+        map(
+                jdbcTemplate.queryForList(
+                        "$BASE_QUERY where a.uid = :uid",
+                        MapSqlParameterSource("uid", uid))
+        ).first()
+    } catch (exception: NoSuchElementException) {
+        throw ActorNotFoundException(uid);
+    }
+
 
     fun map(results: List<Map<String, Any>>) = results.groupBy {
         it.get("UID")
@@ -54,6 +59,8 @@ class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
         )
     }
 }
+
+class ActorNotFoundException(val uid: String) : Exception()
 
 @RestController
 @RequestMapping("/actors/")

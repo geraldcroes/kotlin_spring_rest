@@ -1,6 +1,7 @@
 package com.github.geraldcroes.kotlin.kotlinspringrest
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.stereotype.Repository
@@ -22,12 +23,15 @@ class MovieRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
 
     fun find() = jdbcTemplate.query(BASE_QUERY, this::mapRow)
 
-    fun get(uid: String) =
-            jdbcTemplate.queryForObject(
-                    "$BASE_QUERY where uid = :uid",
-                    MapSqlParameterSource("uid", uid),
-                    this::mapRow
-            )
+    fun get(uid: String) = try {
+        jdbcTemplate.queryForObject(
+                "$BASE_QUERY where uid = :uid",
+                MapSqlParameterSource("uid", uid),
+                this::mapRow
+        )
+    } catch (exception: EmptyResultDataAccessException) {
+        throw MovieNotFoundException(uid)
+    }
 
     fun mapRow(resultSet: ResultSet, rowNum: Int) =
             Movie(
@@ -36,6 +40,8 @@ class MovieRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
                     resultSet.getInt("year")
             )
 }
+
+class MovieNotFoundException(val uid: String) : Exception()
 
 @RestController
 @RequestMapping("/movies/")

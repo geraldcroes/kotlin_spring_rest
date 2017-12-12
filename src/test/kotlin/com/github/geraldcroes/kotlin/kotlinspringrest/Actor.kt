@@ -58,4 +58,10 @@ class ActorTest {
                 .andExpect(jsonPath("$.uid", `is`("SG")))
                 .andExpect(jsonPath("$.actings", hasSize<Any>(0)))
     }
+
+    @Test
+    fun `should send a 404 when requesting for an unknown actor` () {
+        mvc.perform(get("/actors/FOO"))
+                .andExpect(status().isNotFound())
+    }
 }

@@ -26,20 +26,20 @@ class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
                         from actors a, actings act
                         where a.uid=act.actor_uid"""
 
-    fun find() : List<Actor> {
+    fun find(): List<Actor> {
         return map(jdbcTemplate.queryForList(BASE_QUERY, MapSqlParameterSource()))
     }
 
-    fun get(uid: String) =  map(
-        jdbcTemplate.queryForList(
-        "$BASE_QUERY AND a.uid = :uid",
-        MapSqlParameterSource("uid", uid))
+    fun get(uid: String) = map(
+            jdbcTemplate.queryForList(
+                    "$BASE_QUERY AND a.uid = :uid",
+                    MapSqlParameterSource("uid", uid))
     ).first()
 
     fun map(results: List<Map<String, Any>>) = results.groupBy {
         it.get("UID")
     }.map {
-        Actor (
+        Actor(
                 it.value.first().get("UID") as String,
                 it.value.first().get("NAME") as String,
                 it.value.map {

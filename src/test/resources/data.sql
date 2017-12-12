@@ -26,6 +26,7 @@ INSERT INTO `actors` (`uid`, `name`) values ('MB', 'Monica Bellucci');
 INSERT INTO `actors` (`uid`, `name`) values ('RDK', 'Randall Duk Kim');
 INSERT INTO `actors` (`uid`, `name`) values ('HB', 'Helmut Bakaitis');
 INSERT INTO `actors` (`uid`, `name`) values ('TKA', 'Tanveer K. Atwai');
+INSERT INTO `actors` (`uid`, `name`) values ('SG', 'Some Guy');
 
 DELETE FROM `actings`;
 INSERT INTO `actings` (`actor_uid`, `movie_uid`, `character_uid`) VALUES ('KR', 'TM1', 'TA');

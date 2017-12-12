@@ -37,7 +37,7 @@ class ActorTest {
     fun `should retrieve all 10 actors from the database`() {
         mvc.perform(get("/actors/"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize<Any>(10)))
+                .andExpect(jsonPath("$", hasSize<Any>(11)))
     }
 
     @Test
@@ -48,5 +48,14 @@ class ActorTest {
                 .andExpect(jsonPath("$.uid", `is`("KR")))
                 .andExpect(jsonPath("$.actings[0].movieUid", `is`("TM1")))
                 .andExpect(jsonPath("$.actings[0].characterUid", `is`("TA")))
+    }
+
+    @Test
+    fun `should retrieve an actor even if they haven't played in any movie yet` () {
+        mvc.perform(get("/actors/SG"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", `is`("Some Guy")))
+                .andExpect(jsonPath("$.uid", `is`("SG")))
+                .andExpect(jsonPath("$.actings", hasSize<Any>(0)))
     }
 }

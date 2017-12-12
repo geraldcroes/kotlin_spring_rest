@@ -22,9 +22,10 @@ data class Acting(
 
 @Repository
 class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations) {
-    val BASE_QUERY = """select a.uid, a.name, act.movie_uid, act.character_uid
-                        from actors a, actings act
-                        where a.uid=act.actor_uid"""
+    val BASE_QUERY = """select uid, name, movie_uid, character_uid
+                        from actors a
+                        left JOIN actings on uid = actor_uid
+                        """
 
     fun find(): List<Actor> {
         return map(jdbcTemplate.queryForList(BASE_QUERY, MapSqlParameterSource()))
@@ -32,7 +33,7 @@ class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
 
     fun get(uid: String) = map(
             jdbcTemplate.queryForList(
-                    "$BASE_QUERY AND a.uid = :uid",
+                    "$BASE_QUERY where a.uid = :uid",
                     MapSqlParameterSource("uid", uid))
     ).first()
 
@@ -42,11 +43,13 @@ class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations)
         Actor(
                 it.value.first().get("UID") as String,
                 it.value.first().get("NAME") as String,
-                it.value.map {
-                    Acting(
-                            it.get("MOVIE_UID") as String,
-                            it.get("CHARACTER_UID") as String
-                    )
+                it.value.filter {
+                    it.get("MOVIE_UID") != null
+                }.map {
+                        Acting(
+                                it.get("MOVIE_UID") as String,
+                                it.get("CHARACTER_UID") as String
+                        )
                 }
         )
     }

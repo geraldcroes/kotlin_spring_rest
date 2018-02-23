@@ -21,7 +21,7 @@ data class Acting(
 )
 
 @Repository
-class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations) {
+open class ActorRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations) {
     val BASE_QUERY = """select uid, name, movie_uid, character_uid
                         from actors a
                         left JOIN actings on uid = actor_uid

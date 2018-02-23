@@ -18,7 +18,7 @@ data class Movie(
 )
 
 @Repository
-class MovieRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations) {
+open class MovieRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations) {
     val BASE_QUERY = "select uid, title, year from movies"
 
     fun find() = jdbcTemplate.query(BASE_QUERY, this::mapRow)

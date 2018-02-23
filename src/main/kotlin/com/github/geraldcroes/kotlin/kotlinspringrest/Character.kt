@@ -17,7 +17,7 @@ data class Character(
 )
 
 @Repository
-class CharacterRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations) {
+open class CharacterRepository(@Autowired val jdbcTemplate: NamedParameterJdbcOperations) {
     val BASE_QUERY = "select uid, name from characters"
 
     fun find() = jdbcTemplate.query(BASE_QUERY, this::mapRow)
